@@ -1,28 +1,32 @@
 #ifndef __DATAMATRIX_H
 #define __DATAMATRIX_H
 
-#include <vector>
-#include <fstream>
+#include <cstdio>
+
 
 class DataMatrix
 {
     private:
-    unsigned char* matrix;
+    double* matrix;
     unsigned int rows;
     unsigned int columns;
 
 
     public:
     DataMatrix(unsigned int, unsigned int);
+    DataMatrix(DataMatrix*);
+    ~DataMatrix();
+    
+    double& getElement(unsigned int, unsigned int);
 
-    unsigned char& getElement(unsigned int);
-    unsigned char& getElement(unsigned int, unsigned int);
+    void print();
 
-
-    unsigned char* getMatrix();
+    double* getMatrix();
     unsigned int getDimension();
     unsigned int getRows();
     unsigned int getColumns();
+
+    void scalarMultiply(double);
 };
 
 #endif

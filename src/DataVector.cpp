@@ -3,16 +3,32 @@
 
 DataVector::DataVector(unsigned int i)
 {
-    vector = (unsigned char*) malloc(i);
+    vector = new double[i]();
     dimension = i;
 }
 
-unsigned char& DataVector::getElement(unsigned int i)
+DataVector::~DataVector()
 {
-    return *(vector + i);
+    delete vector;
 }
 
-void* DataVector::getVector()
+void DataVector::print()
+{
+	for(int i = 0; i<dimension; i++)
+	{
+		
+        printf("%5.2f ", this->getElement(i));
+	}
+    printf("\n");
+}
+
+
+double& DataVector::getElement(unsigned int i)
+{
+    return vector[i];
+}
+
+double* DataVector::getVector()
 {
     return vector;
 }
@@ -20,5 +36,13 @@ void* DataVector::getVector()
 unsigned int DataVector::getDimension()
 {
     return dimension;
+}
+
+void DataVector::scalarMultiply(double a)
+{
+	for(int i = 0; i < dimension; i++)
+	{
+		vector[i] *= a;
+	}
 }
 

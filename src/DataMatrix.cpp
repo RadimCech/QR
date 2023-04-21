@@ -4,21 +4,49 @@ DataMatrix::DataMatrix(unsigned int m, unsigned int n) //rows,columns
 {
 	rows = m;
 	columns = n;
-	matrix = (unsigned char*)malloc(m*n*10);
+	matrix = new double[m*n](); // rows storec sequentially
 
 }
 
-unsigned char& DataMatrix::getElement(unsigned int i) //ith row, jth column
+DataMatrix::~DataMatrix()
 {
-	return matrix[i];
+	delete matrix;
 }
 
-unsigned char& DataMatrix::getElement(unsigned int i, unsigned int j) //ith row, jth column
+
+DataMatrix::DataMatrix(DataMatrix* A) //make a copy
 {
-	return matrix[i+j*rows];
+	rows = A->getRows();
+	columns = A->getColumns();
+	matrix = new double[rows*columns];
+	double* otherMatrix = A->getMatrix();
+	for(int i = 0; i<rows*columns; i++)
+	{
+		matrix[i] = otherMatrix[i];
+	}
+
 }
 
-unsigned char* DataMatrix::getMatrix()
+void DataMatrix::print()
+{
+	for(int i = 0; i<rows; i++)
+	{
+		for(int j = 0; j<columns; j++)
+		{
+			printf("%5.2f ", this->getElement(i,j));
+		}
+		printf("\n");
+	}
+}
+
+
+
+double& DataMatrix::getElement(unsigned int i, unsigned int j) //ith row, jth column
+{
+	return matrix[i*columns + j];
+}
+
+double* DataMatrix::getMatrix()
 {
 	return matrix;
 }
@@ -37,4 +65,12 @@ unsigned int DataMatrix::getColumns()
 {
 	return columns;
 } 
+
+void DataMatrix::scalarMultiply(double a)
+{
+	for(int i = 0; i< rows*columns; i++)
+	{
+		matrix[i] *= a;
+	}
+}
 

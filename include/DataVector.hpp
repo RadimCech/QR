@@ -7,19 +7,20 @@
 class DataVector
 {
     private:
-    unsigned char* vector;
+    double* vector;
     unsigned int dimension;
 
 
     public:
     DataVector(unsigned int);
+    ~DataVector();
 
-    unsigned char& getElement(unsigned int);
-
-
-    void* getVector();
+    void print();
+    double& getElement(unsigned int);
+    double* getVector();
     unsigned int getDimension();
 
+    void scalarMultiply(double);
     
 };
 
