@@ -15,31 +15,41 @@ std::vector<DataMatrix*> Math::HouseHolderBidiagonalization(DataMatrix* matrix)
     //A = UBV^T
     DataMatrix* U = LeftHouseholder(matrix,0);// = new DataMatrix(matrix->getRows(), matrix->getColumns());
     DataMatrix* B = new DataMatrix(matrix);
-    DataMatrix* V = RightHouseholder(matrix,0);
     //first iteration
  
     G = Math::MultiplyByLeftHouseholder(U,B);
-
     delete B;
     B = G;
 
+
+    printf("b bez prvniho sloupce\n");
     B->print();
+
+    DataMatrix* V = RightHouseholder(B,0);
 
     G = Math::MultiplyByRightHouseholder(B,V);
     delete B;
     B = G;  
+
+    printf("b bez prvniho radku uprimne doufam:\n");
+    B->print();
     //B = U*B
 
 
 
-    for(int k = 1; k < matrix->getColumns()-1; k++)
+    for(int k = 1; k < matrix->getColumns(); k++)//to do:pokud je matrix ctvercova tak lze vynechat posledni iteraci 
     {
         G = Math::LeftHouseholder(B,k);
 
+        printf("\ndalsi Q matice:\n");
+        G->print();
         //B := G*B
         H = Math::MultiplyByLeftHouseholder(G, B, 'd');
         delete B;
         B = H;
+
+        printf("\n bidiagonalni tvar:\n");
+        B->print();
 
         //U := U*G
         H = Math::MultiplyByRightHouseholder(U, G);
@@ -48,21 +58,21 @@ std::vector<DataMatrix*> Math::HouseHolderBidiagonalization(DataMatrix* matrix)
 
         if(k<matrix->getColumns()-2)
         {
-        G = Math::RightHouseholder(B, k);
 
-        //B := B*G
-        H = Math::MultiplyByRightHouseholder(B, G, 'd');
-        delete B;
-        B = H;
+            G = Math::RightHouseholder(B, k);
 
-        //V := G*V
-        H = Math::MultiplyByLeftHouseholder(G,V);
-        delete V;
-        V = H;
+            //B := B*G
+            H = Math::MultiplyByRightHouseholder(B, G, 'd');
+            delete B;
+            B = H;
+
+            //V := G*V
+            H = Math::MultiplyByLeftHouseholder(G,V);
+            delete V;
+            V = H;
         }
     }
     std::vector<DataMatrix*> output(3,0);
-
     output.at(0) = U;
     output.at(1) = B;
     output.at(2) = V;
@@ -73,7 +83,7 @@ std::vector<DataMatrix*> Math::HouseHolderBidiagonalization(DataMatrix* matrix)
 //return the k-th Q matrix without the identity submatrix
 DataMatrix* Math::LeftHouseholder(DataMatrix* A, int k) 
 {
-    DataMatrix* Q = new DataMatrix(A->getRows()-k, A->getColumns()-k);
+    DataMatrix* Q = new DataMatrix(A->getRows()-k, A->getRows()-k);
     DataVector* u = new DataVector(A->getRows()-k);
 
     double euclidNorm = 0;
@@ -82,7 +92,7 @@ DataMatrix* Math::LeftHouseholder(DataMatrix* A, int k)
     for(int i = 0; i < A->getRows()-k; i++) //u := kth column of A without the first k rows
     {
         u->getElement(i) = A->getElement(k+i, k);
-        euclidNorm = euclidNorm + A->getElement(k+i,k) * A->getElement(k+i, k);
+        euclidNorm += A->getElement(k+i,k) * A->getElement(k+i, k);
     }
 
     if(u->getElement(0)<0)
@@ -107,26 +117,30 @@ DataMatrix* Math::LeftHouseholder(DataMatrix* A, int k)
 //return the k-th P matrix without the identity submatrix
 DataMatrix* Math::RightHouseholder(DataMatrix* A, int k) 
 {
-    DataMatrix* P = new DataMatrix(A->getRows()-k, A->getColumns()-k);
-    DataVector* u = new DataVector(A->getRows()-k);
+
+    DataMatrix* P = new DataMatrix(A->getColumns()-k-1, A->getColumns()-k-1);
+    DataVector* u = new DataVector(A->getColumns()-k-1);
 
     float euclidNorm = 0;
 
 
-    for(int i = 0; i < A->getColumns()-k; i++) //u := kth column of A without the first k rows
+    for(int i = 0; i < A->getColumns()-k-1; i++) //u := kth row of A without the first k columns
     {
         u->getElement(i) = A->getElement(k, k+i+1);
-        euclidNorm += A->getElement(k,k+i+1);
+        euclidNorm += A->getElement(k,k+i+1) * A->getElement(k,k+i+1);
     }
 
-    u->getElement(0) -= sqrt(euclidNorm); //subtract the norm of u from the first coordinate
-    Math::Normalize(u);
+
+    if(u->getElement(0)<0)
+    u->getElement(0) += sqrt(euclidNorm); //subtract the norm of u from the first coordinate
+    else 
+    u->getElement(0) -= sqrt(euclidNorm);
+
 
     //assemble p
     P = Math::OuterProduct(u);
-    P->scalarMultiply(-2);
+    P->scalarMultiply(-2 / Math::GetNorm2(u));
 
-     
     for(int i = 0; i< u->getDimension(); i++)
     {
         P->getElement(i,i) += 1;
@@ -145,52 +159,51 @@ DataMatrix* Math::MultiplyByLeftHouseholder(DataMatrix* A, DataMatrix* B, char c
     int m = 0;
     if(c == 'd') m = k;
 
-    DataMatrix* C = new DataMatrix(A->getRows(), B->getColumns());
-  
+    DataMatrix* C = new DataMatrix(B);
+
+
     for(int i = k; i < B->getRows(); i++)   //lze preskocit k radku
     {
         
         for(int j = m; j< B->getColumns(); j++) //pokud je cast B v diagonalnim tvaru lze preskocit k sloupcu
         {
 
-            float a = 0;
+            double a = 0;
             //tady se dejou hrozne veci
             for(int l = k; l<B->getRows(); l++) //mozna bug
             {
-
-                a += A->getElement(i, l)+B->getElement(l, j); 
+                
+                a +=  A->getElement(i-k, l-k)*B->getElement(l, j); 
             }
-
             (C->getElement(i,j)) = a;
         }
     }
-
     return C;
 }
 
 DataMatrix* Math::MultiplyByRightHouseholder(DataMatrix* A, DataMatrix* B, char c) //B := A*B
 {
 
-    int k = A->getRows(); 
+    int k = A->getColumns() - B->getRows(); 
 
     //d for diagonal 
     int m = 0;
-    if(c == 'd') m = k;
+    if(c == 'd') m = k-1;
 
-    DataMatrix* C = new DataMatrix(A->getRows(), B->getColumns());
-  
-    for(int i = m; i < B->getRows(); i++)
+    DataMatrix* C = new DataMatrix(A); //lze optimalizovat
+    for(int i = m; i < A->getRows(); i++) //pokud je A v diagonalnim tvaru pak lze mozna preskocit k-1 radku ?
     {
         
-        for(int j = k; j< B->getColumns(); j++) //nasobi se ty submatice jenom jakoby zacne se od k vsude
+        for(int j = k; j< A->getColumns(); j++) //lze preskocit k sloupcu
         {
 
             float a = 0;
             //tady se dejou hrozne veci
-            for(int l = k; l<B->getRows(); l++) //mozna bug
+            for(int l = k; l<A->getColumns(); l++) //mozna bug
             {
-
-                a += A->getElement(i, l)+B->getElement(l, j); 
+                //printf("\nno a potom take vypisu i a j: %i %i\n", i,j);
+                //printf("\nprave se bude scitat: %5.3f * %5.3f tj. prvky na indexech (%i, %i) a (%i, %i)...\n", A->getElement(i, l), B->getElement(l-k, j-k), i, l, l-k, j-k);
+                a += A->getElement(i, l)*B->getElement(l-k, j-k); //urcite rozbite...unless ?
             }
 
             (C->getElement(i,j)) = a;
@@ -286,16 +299,17 @@ void Math::Normalize(DataVector* v) //overrides original vector
 int main()
 {
 
-    DataMatrix* A = new DataMatrix(3,3);
-    float pole[9] = {12, -51, 4, 6, 167, -68, -4, 24, -41};
+    DataMatrix* A = new DataMatrix(6,5);
+    float pole[30] = {12, -51, 4, 6, 167, -68, -4, 24, -44, 5, 10 ,15, 45, 243, 2, 550, 12, 95, -0.2, -43,-12, -51, 4, 5, 167, -68, -4, 24, -31, 5};
 
     for(int i = 0; i<A->getRows(); i++)
     {
         for(int j = 0; j<A->getColumns(); j++)
         {
-            A->getElement(i,j) = pole[i*3+j];
+            A->getElement(i,j) = pole[i*(A->getRows()-1)+j];
         }
     }
+    printf("\n");
     A->print();
     printf("\n");
     

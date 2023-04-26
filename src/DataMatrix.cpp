@@ -33,7 +33,7 @@ void DataMatrix::print()
 	{
 		for(int j = 0; j<columns; j++)
 		{
-			printf("%5.2f ", this->getElement(i,j));
+			printf(" %5.2f ", this->getElement(i,j));
 		}
 		printf("\n");
 	}
