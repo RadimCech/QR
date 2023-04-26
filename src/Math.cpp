@@ -21,18 +21,12 @@ std::vector<DataMatrix*> Math::HouseHolderBidiagonalization(DataMatrix* matrix)
     delete B;
     B = G;
 
-
-    printf("b bez prvniho sloupce\n");
-    B->print();
-
     DataMatrix* V = RightHouseholder(B,0);
 
     G = Math::MultiplyByRightHouseholder(B,V);
     delete B;
-    B = G;  
+    B = G;
 
-    printf("b bez prvniho radku uprimne doufam:\n");
-    B->print();
     //B = U*B
 
 
@@ -41,15 +35,10 @@ std::vector<DataMatrix*> Math::HouseHolderBidiagonalization(DataMatrix* matrix)
     {
         G = Math::LeftHouseholder(B,k);
 
-        printf("\ndalsi Q matice:\n");
-        G->print();
         //B := G*B
         H = Math::MultiplyByLeftHouseholder(G, B, 'd');
         delete B;
         B = H;
-
-        printf("\n bidiagonalni tvar:\n");
-        B->print();
 
         //U := U*G
         H = Math::MultiplyByRightHouseholder(U, G);
@@ -201,8 +190,6 @@ DataMatrix* Math::MultiplyByRightHouseholder(DataMatrix* A, DataMatrix* B, char 
             //tady se dejou hrozne veci
             for(int l = k; l<A->getColumns(); l++) //mozna bug
             {
-                //printf("\nno a potom take vypisu i a j: %i %i\n", i,j);
-                //printf("\nprave se bude scitat: %5.3f * %5.3f tj. prvky na indexech (%i, %i) a (%i, %i)...\n", A->getElement(i, l), B->getElement(l-k, j-k), i, l, l-k, j-k);
                 a += A->getElement(i, l)*B->getElement(l-k, j-k); //urcite rozbite...unless ?
             }
 
@@ -309,20 +296,17 @@ int main()
             A->getElement(i,j) = pole[i*(A->getRows()-1)+j];
         }
     }
-    printf("\n");
-    A->print();
-    printf("\n");
     
     std::vector<DataMatrix*> UBV = Math::HouseHolderBidiagonalization(A);
-    // printf("\n\n\n\n");
-    // printf("A\n");
-    // A->print();
-    // printf("V\n");
-    // UBV.at(0)->print();
-    // printf("B\n");
-    // UBV.at(1)->print();
-    // printf("V transposed\n");
-    // UBV.at(2)->print();
+    printf("\n\n\n\n");
+    printf("A\n");
+    A->print();
+    printf("V\n");
+    UBV.at(0)->print();
+    printf("B\n");
+    UBV.at(1)->print();
+    printf("V transposed bez identicke submatice\n");
+    UBV.at(2)->print();
 
 
 
