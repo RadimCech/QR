@@ -10,6 +10,7 @@ unsigned int Math::SwapEndianness(unsigned int x)
 
 std::vector<DataMatrix*> Math::HouseHolderBidiagonalization(DataMatrix* matrix) 
 {
+    
     DataMatrix* G;
     DataMatrix* H;
     //A = UBV^T
@@ -305,9 +306,6 @@ int main()
     UBV.at(0)->print();
     printf("B\n");
     UBV.at(1)->print();
-    printf("V transposed bez identicke submatice\n");
+    printf("V without the identity submatrix\n");
     UBV.at(2)->print();
-
-
-
 }

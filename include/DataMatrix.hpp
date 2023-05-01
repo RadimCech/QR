@@ -14,6 +14,7 @@ class DataMatrix
 
     public:
     DataMatrix(unsigned int, unsigned int);
+    //copy constructor
     DataMatrix(DataMatrix*);
     ~DataMatrix();
     
