@@ -9,7 +9,7 @@ DataVector::DataVector(unsigned int i)
 
 DataVector::~DataVector()
 {
-    delete vector;
+    delete[] vector;
 }
 
 void DataVector::print()

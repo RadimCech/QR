@@ -10,7 +10,7 @@ DataMatrix::DataMatrix(unsigned int m, unsigned int n) //rows,columns
 
 DataMatrix::~DataMatrix()
 {
-	delete matrix;
+	delete[] matrix;
 }
 
 
