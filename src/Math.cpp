@@ -206,7 +206,7 @@ DataMatrix* Math::NaiveMatrixMultiply(DataMatrix* A, DataMatrix* B) //return C :
 {
     if(A->getColumns()!=B->getRows())
     {
-        printf("je to v pici");
+        printf("size");
         return NULL;
     }
 
